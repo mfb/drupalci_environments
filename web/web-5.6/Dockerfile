@@ -1,4 +1,4 @@
-FROM       php:5.6.7-apache
+FROM       php:5.6-apache
 MAINTAINER drupalci
 
 
