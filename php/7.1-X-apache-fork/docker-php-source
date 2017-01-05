@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
 dir=/usr/src/php
@@ -17,12 +17,12 @@ usage() {
 case "$1" in
 	extract)
 		mkdir -p "$dir"
+		mkdir -p /tmp/phpsrc
 		if [ ! -f "$dir/.docker-extracted" ]; then
 		    shopt -s dotglob
-			unzip /usr/src/php.zip -d "$dir"
-			f=("$dir"/*)
-			mv "$dir"/*/* "$dir"
-			rmdir "${f[@]}"
+			unzip /usr/src/php.zip -d /tmp/phpsrc
+			mv /tmp/phpsrc/*/* "$dir"
+			rm -rf /tmp/phpsrc
 			touch "$dir/.docker-extracted"
 		fi
 		;;
