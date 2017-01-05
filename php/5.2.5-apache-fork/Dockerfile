@@ -26,11 +26,11 @@ RUN apt-get update && apt-get install -y \
 		libmysqlclient-dev \
 		libssl-dev \
 		libcurl4-openssl-dev \
-	--no-install-recommends && rm -r /var/lib/apt/lists/* && ln -s /usr/lib/x86_64-linux-gnu/libmysqlclient.so /usr/lib/x86_64-linux-gnu/libmysqlclient_r.so
+	--no-install-recommends && rm -r /var/lib/apt/lists/*
 
 RUN set -x \
     	&& curl -SLO http://launchpadlibrarian.net/140087283/libbison-dev_2.7.1.dfsg-1_amd64.deb \
-    	&& curl -SLO http://launchpadlibrarian.net/140087282/bison_2.7.1.dfsg-1_amd64.deb \
+    	&& curl -SLO http://launchpadlibrarian.net/8712749/bison_2.3.dfsg-5_amd64.deb \
     	&& dpkg -i libbison-dev_2.7.1.dfsg-1_amd64.deb \
     	&& dpkg -i bison_2.7.1.dfsg-1_amd64.deb \
     	&& rm *.deb
