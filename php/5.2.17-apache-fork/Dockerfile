@@ -158,9 +158,10 @@ RUN set -xe \
 # --enable-mbstring is included here because otherwise there's no way to get pecl to use it properly (see https://github.com/docker-library/php/issues/195)
 		--enable-mbstring \
         \
-		--with-mysql \
+		--with-mysql=/usr/bin \
         --with-mysqli \
         --with-pdo-mysql \
+        --with-libdir=lib64 \
 		\
 		--with-curl \
 		--with-libedit \
