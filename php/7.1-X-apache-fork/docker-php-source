@@ -20,8 +20,7 @@ case "$1" in
 		mkdir -p /tmp/phpsrc
 		if [ ! -f "$dir/.docker-extracted" ]; then
 			unzip /usr/src/php.zip -d /tmp/phpsrc
-			mv /tmp/phpsrc/*/* "$dir"
-			mv /tmp/phpsrc/*/.* "$dir"
+			cp -r /tmp/phpsrc/*/. "$dir"
 			rm -rf /tmp/phpsrc
 			touch "$dir/.docker-extracted"
 		fi
