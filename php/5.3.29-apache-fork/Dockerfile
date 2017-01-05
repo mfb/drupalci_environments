@@ -31,7 +31,7 @@ RUN set -x \
     	&& curl -SLO http://launchpadlibrarian.net/140087282/bison_2.7.1.dfsg-1_amd64.deb \
     	&& dpkg -i libbison-dev_2.7.1.dfsg-1_amd64.deb \
     	&& dpkg -i bison_2.7.1.dfsg-1_amd64.deb \
-    	&& rm *.deb \
+    	&& rm *.deb
 
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN mkdir -p $PHP_INI_DIR/conf.d
