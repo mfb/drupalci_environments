@@ -116,7 +116,7 @@ RUN set -xe; \
 	wget -O php.zip "$PHP_URL"; \
 	\
 	apt-get purge -y --auto-remove $fetchDeps
-
+ENV PHP_VERSION 7.1
 COPY docker-php-source /usr/local/bin/
 
 RUN set -xe \
