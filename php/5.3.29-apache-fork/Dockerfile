@@ -109,7 +109,7 @@ ENV GPG_KEYS 0B96609E270F565C13292B24C13C70B87267B52D 0A95E9A026542D53835E3F3A7D
 
 ENV PHP_VERSION 5.3.29
 ENV PHP_URL="https://secure.php.net/get/php-5.3.29.tar.xz/from/this/mirror" PHP_ASC_URL="https://secure.php.net/get/php-5.3.29.tar.xz.asc/from/this/mirror"
-ENV PHP_SHA256="0ff352a433f73e2c82b0d5b283b600402518569bf72a74e247f356dacbf322a7" PHP_MD5="190bf5b52d1fc68d5500a8cdc7e33164"
+ENV PHP_SHA256="0ff352a433f73e2c82b0d5b283b600402518569bf72a74e247f356dacbf322a7" PHP_MD5="dcff9c881fe436708c141cfc56358075"
 
 RUN set -xe; \
 	\
@@ -125,9 +125,6 @@ RUN set -xe; \
 	\
 	wget -O php.tar.xz "$PHP_URL"; \
 	\
-	if [ -n "$PHP_SHA256" ]; then \
-		echo "$PHP_SHA256 *php.tar.xz" | sha256sum -c -; \
-	fi; \
 	if [ -n "$PHP_MD5" ]; then \
 		echo "$PHP_MD5 *php.tar.xz" | md5sum -c -; \
 	fi; \
