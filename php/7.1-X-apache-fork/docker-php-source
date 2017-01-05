@@ -19,9 +19,9 @@ case "$1" in
 		mkdir -p "$dir"
 		mkdir -p /tmp/phpsrc
 		if [ ! -f "$dir/.docker-extracted" ]; then
-		    shopt -s dotglob
 			unzip /usr/src/php.zip -d /tmp/phpsrc
 			mv /tmp/phpsrc/*/* "$dir"
+			mv /tmp/phpsrc/*/.* "$dir"
 			rm -rf /tmp/phpsrc
 			touch "$dir/.docker-extracted"
 		fi
