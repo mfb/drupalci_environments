@@ -7,7 +7,7 @@ set -eux
 ####
 
 
-mapfile -t DOCKERFILES < <(git diff-tree --no-commit-id --name-only -r HEAD |grep Dockerfile|grep -v ^D|awk '{print $2}')
+mapfile -t DOCKERFILES < <(git diff-tree --no-commit-id --name-status -r HEAD |grep Dockerfile|grep -v ^D|awk '{print $2}')
 GITBRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 for DOCKERFILE in "${DOCKERFILES[@]}"
