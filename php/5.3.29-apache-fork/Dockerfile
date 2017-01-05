@@ -24,6 +24,8 @@ RUN apt-get update && apt-get install -y \
 		libsqlite3-0 \
 		libxml2 \
 		libmysqlclient-dev \
+		libssl-dev \
+		libcurl4-openssl-dev \
 		xz-utils \
 	--no-install-recommends && rm -r /var/lib/apt/lists/*
 
