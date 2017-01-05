@@ -84,14 +84,16 @@ ENV PHP_EXTRA_CONFIGURE_ARGS --with-apxs2
 
 ENV GPG_KEYS 0B96609E270F565C13292B24C13C70B87267B52D 0BD78B5F97500D450838F95DFE857D9A90D90EC1 F38252826ACD957EF380D39F2F7956BC5DA04B5D
 
-ENV PHP_VERSION 5.5.38
-ENV PHP_FILENAME php-5.5.38.tar.xz
-ENV PHP_SHA256 cb527c44b48343c8557fe2446464ff1d4695155a95601083e5d1f175df95580f
+ENV PHP_VERSION 5.5.9
+ENV PHP_FILENAME php-5.5.9.tar.xz
+ENV PHP_MD5 139e2ac02fddd4c80cc31de000c6f7e3
+
+
 
 RUN set -xe \
 	&& cd /usr/src \
 	&& curl -fSL "http://php.net/get/$PHP_FILENAME/from/this/mirror" -o php.tar.xz \
-	&& echo "$PHP_SHA256 *php.tar.xz" | sha256sum -c - \
+	&& echo "$PHP_MD5 *php.tar.xz" | md5sum -c - \
 	&& curl -fSL "http://php.net/get/$PHP_FILENAME.asc/from/this/mirror" -o php.tar.xz.asc \
 	&& export GNUPGHOME="$(mktemp -d)" \
 	&& for key in $GPG_KEYS; do \
