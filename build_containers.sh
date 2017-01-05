@@ -5,6 +5,8 @@ set -eux
 # which docker files were changed in the last commit.
 #
 ####
+groups
+env
 
 
 mapfile -t DOCKERFILES < <(git diff-tree --no-commit-id --name-status -r HEAD |grep Dockerfile|grep -v ^D|awk '{print $2}')
