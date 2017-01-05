@@ -161,7 +161,7 @@ RUN set -xe \
 		--with-mysql=/usr/bin \
         --with-mysqli \
         --with-pdo-mysql \
-        --with-libdir=lib64 \
+        --with-libdir=/usr/lib/x86_64-linux-gnu \
 		\
 		--with-curl \
 		--with-libedit \
