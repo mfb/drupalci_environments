@@ -32,7 +32,7 @@ RUN set -x \
     	&& curl -SLO http://launchpadlibrarian.net/140087283/libbison-dev_2.7.1.dfsg-1_amd64.deb \
     	&& curl -SLO http://launchpadlibrarian.net/8712749/bison_2.3.dfsg-5_amd64.deb \
     	&& dpkg -i libbison-dev_2.7.1.dfsg-1_amd64.deb \
-    	&& dpkg -i bison_2.7.1.dfsg-1_amd64.deb \
+    	&& dpkg -i bison_2.3.dfsg-5_amd64.deb \
     	&& rm *.deb
 
 ENV PHP_INI_DIR /usr/local/etc/php
