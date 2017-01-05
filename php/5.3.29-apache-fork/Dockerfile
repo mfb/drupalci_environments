@@ -180,7 +180,6 @@ RUN set -xe \
 		\
 		--with-curl \
 		--with-libedit \
-		--with-openssl \
 		--with-zlib \
 		--enable-debug \
 		\
