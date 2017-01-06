@@ -233,8 +233,6 @@ RUN curl -o /tmp/composer-setup.php https://getcomposer.org/installer \
   && chmod +x /usr/local/bin/drush \
   && /usr/local/bin/drush --version
 
-
-
 COPY ./conf/supervisor-phantomjs.conf /etc/supervisor/conf.d/phantomjs.conf
 
 ENTRYPOINT ["docker-php-entrypoint"]
