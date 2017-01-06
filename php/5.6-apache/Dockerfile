@@ -182,7 +182,7 @@ RUN set -xe \
 	\
 	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps
 
-
+COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
 RUN buildDeps=" \
     g++ \
@@ -216,7 +216,6 @@ RUN buildDeps=" \
     && pecl install yaml < /usr/lib/x86_64-linux-gnu \
     && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false $buildDeps
 
-COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 COPY ./conf/php/php.ini /usr/local/etc/php/php.ini
 COPY ./conf/php/php-cli.ini /usr/local/etc/php/php-cli.ini
 
