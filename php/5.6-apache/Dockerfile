@@ -200,7 +200,7 @@ RUN buildDeps=" \
     unzip \
     " \
     && set -x \
-    && apt-get update
+    && apt-get update \
     && apt-get install -y bzip2 curl fontconfig git libc6 libcomerr2 libfontconfig1 libfreetype6 libgcc1 \
     libmcrypt4 libgcrypt20 libgpg-error0 libicu52 libjpeg62-turbo libkeyutils1 liblzma5 \
     libpng12-0 libpq5 libreadline6 libtidy-0.99-0 libtinfo5 libwebp5 libxslt1.1 libyaml-0-2 mysql-client \
