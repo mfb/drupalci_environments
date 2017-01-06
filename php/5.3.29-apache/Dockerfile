@@ -182,6 +182,7 @@ RUN set -xe \
 	&& make install \
 	&& { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
 	&& make clean \
+	#	&& docker-php-source delete \
 	\
 	&& dpkg -r bison libbison-dev \
 	&& apt-get purge -y --auto-remove autoconf2.13 \
