@@ -14,5 +14,6 @@ if [[ ! -z "${DOCKERFILES-}" ]]; then
     do
       DOCKERTAG=$(echo ${DOCKERFILE} | awk 'BEGIN {FS="/";} {print $1"-"$2}')
       docker build -t drupalci/${DOCKERTAG}:${GITBRANCH} ./${DOCKERFILE%/Dockerfile}
+      docker push drupalci/${DOCKERTAG}:${GITBRANCH}
     done
 fi
