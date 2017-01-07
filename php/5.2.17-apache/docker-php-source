@@ -24,7 +24,7 @@ case "$1" in
 		;;
 
 	delete)
-		rm -rf "$dir"
+		rm -rf /usr/src/php.tar.gz
 		;;
 
 	*)
