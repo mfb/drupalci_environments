@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
 		libedit2 \
 		libsqlite3-0 \
 		libxml2 \
+		gdb \
 		libmysqlclient-dev \
 		libssl-dev \
 		libcurl4-openssl-dev \
