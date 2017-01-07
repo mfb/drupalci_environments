@@ -1,4 +1,4 @@
-FROM drupalci/db-base
+FROM       ubuntu:trusty
 MAINTAINER drupalci
 
 # Packages.
