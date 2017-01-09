@@ -218,19 +218,12 @@ COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 #    && apt-get install -y bzip2 fontconfig git libc6 libcomerr2 libfontconfig1 libfreetype6 libgcc1 \
 #    libmcrypt4 libgcrypt20 libgpg-error0 libicu52 libjpeg62-turbo libkeyutils1 liblzma5 \
 #    libpng12-0 libpq5 libreadline6 libtidy-0.99-0 libtinfo5 libwebp5 libxslt1.1 libyaml-0-2 mysql-client \
-#    postgresql-client sqlite3 sudo  zlib1g --no-install-recommends \
+#    postgresql-client zlib1g --no-install-recommends \
 #    && apt-get install -y $buildDeps --no-install-recommends \
-#    && rm -rf /var/lib/apt/lists/* \
-#    && docker-php-ext-install bcmath exif ftp gettext intl mcrypt mbstring mysql mysqli opcache \
-#    pcntl pdo_mysql pdo_pgsql pgsql shmop soap sockets sysvsem sysvshm tidy wddx xmlrpc xsl zip \
-#    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
-#    && docker-php-ext-install gd \
-#RUN echo | pecl install channel://pecl.php.net/APCu-4.0.11 \
-#&& echo | pecl install xdebug \
-#&&  echo | pecl install yaml \
 #    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false $buildDeps
 RUN docker-php-ext-pecl-install APCu-4.0.11 xdebug yaml && sed -i 's/^/;/' /usr/local/etc/php/conf.d/docker-php-pecl-xdebug.ini
 
+RUN apt-get install -y sudo sqlite3 --no-install-recommends && rm -rf /var/lib/apt/lists/* \
 COPY ./conf/php/php.ini /usr/local/etc/php/php.ini
 COPY ./conf/php/php-cli.ini /usr/local/etc/php/php-cli.ini
 
