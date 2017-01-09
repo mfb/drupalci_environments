@@ -246,9 +246,8 @@ RUN curl -o /tmp/composer-setup.php https://getcomposer.org/installer \
   && chmod 755 /usr/bin/phantomjs \
   && curl -o /usr/local/bin/drush http://files.drush.org/drush.phar \
   && chmod +x /usr/local/bin/drush \
-  && /usr/local/bin/drush --version
-
-RUN apt-get update && apt-get install -y supervisor
+  && /usr/local/bin/drush --version \
+  && apt-get update && apt-get install -y supervisor && rm -rf /var/lib/apt/lists/*
 
 COPY ./conf/supervisor-phantomjs.conf /etc/supervisor/conf.d/phantomjs.conf
 
