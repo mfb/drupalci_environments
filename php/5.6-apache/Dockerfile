@@ -223,7 +223,10 @@ COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 #    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false -o APT::AutoRemove::SuggestsImportant=false $buildDeps
 RUN docker-php-ext-pecl-install APCu-4.0.11 xdebug yaml && sed -i 's/^/;/' /usr/local/etc/php/conf.d/docker-php-pecl-xdebug.ini
 
-RUN apt-get install -y sudo sqlite3 --no-install-recommends && rm -rf /var/lib/apt/lists/* \
+RUN apt-get update \
+    && apt-get install -y sudo sqlite3 --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY ./conf/php/php.ini /usr/local/etc/php/php.ini
 COPY ./conf/php/php-cli.ini /usr/local/etc/php/php-cli.ini
 
