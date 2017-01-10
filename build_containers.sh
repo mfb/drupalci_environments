@@ -17,7 +17,8 @@ if [[ ! -z "${DOCKERFILES-}" ]]; then
       BUILDRESULT=$?
       if [ ${BUILDRESULT} -eq 0 ]; then
           docker push drupalci/${DOCKERTAG}:${GITBRANCH}
-          curl https://dispatcher.drupalci.org/job/drupalci_test_containers/buildWithParameters?token=${2}\&DCI_PHPVersion=${DOCKERTAG}:${GITBRANCH}\&DCI_TestItem=Url
+          #TODO: this currently assumes that the only containers we are working on are the php containers.
+          curl https://dispatcher.drupalci.org/job/drupalci_test_containers/buildWithParameters?token=${2}\&DCI_PHPVersion=${DOCKERTAG}:${GITBRANCH}
       fi
     done
 fi
