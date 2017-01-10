@@ -14,7 +14,7 @@ if [[ ! -z "${DOCKERFILES-}" ]]; then
     do
       DOCKERTAG=$(echo ${DOCKERFILE} | awk 'BEGIN {FS="/";} {print $1"-"$2}')
       docker build -t drupalci/${DOCKERTAG}:${GITBRANCH} ./${DOCKERFILE%/Dockerfile}
-      BUILDRESULT = $?
+      BUILDRESULT=$?
       if [ ${BUILDRESULT} -eq 0 ]; then
           docker push drupalci/${DOCKERTAG}:${GITBRANCH}
           curl https://dispatcher.drupalci.org/job/drupalci_test_containers/buildWithParameters?token=${2}\&DCI_PHPVersion=${DOCKERTAG}:${GITBRANCH}\&DCI_TestItem=Url
