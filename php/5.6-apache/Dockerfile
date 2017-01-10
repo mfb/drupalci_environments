@@ -213,35 +213,38 @@ COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 #    libyaml-dev \
 #    ncurses-dev \
 #    unzip \
-#    && set -x \
-#    && apt-get update \
-#    && apt-get install -y bzip2 fontconfig git libc6 libcomerr2 libfontconfig1 libfreetype6 libgcc1 \
+
+#    apt-get install -y bzip2  git libc6 libcomerr2 libfontconfig1 libfreetype6 libgcc1 \
 #    libmcrypt4 libgcrypt20 libgpg-error0 libicu52 libjpeg62-turbo libkeyutils1 liblzma5 \
 #    libpng12-0 libpq5 libreadline6 libtidy-0.99-0 libtinfo5 libwebp5 libxslt1.1 libyaml-0-2 zlib1g --no-install-recommends \
 #
-RUN docker-php-ext-pecl-install APCu-4.0.11 xdebug yaml && sed -i 's/^/;/' /usr/local/etc/php/conf.d/docker-php-pecl-xdebug.ini
-
-RUN apt-get update \
+RUN docker-php-ext-pecl-install APCu-4.0.11 xdebug yaml \
+    && sed -i 's/^/;/' /usr/local/etc/php/conf.d/docker-php-pecl-xdebug.ini
+    && apt-get update \
     && apt-get install -y mysql-client postgresql-client sudo sqlite3 --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY ./conf/php/php.ini /usr/local/etc/php/php.ini
 COPY ./conf/php/php-cli.ini /usr/local/etc/php/php-cli.ini
 
-# Install Composer, PhantomJS, Drush
+# Install Composer, Drush
 RUN curl -o /tmp/composer-setup.php https://getcomposer.org/installer \
   && curl -o /tmp/composer-setup.sig https://composer.github.io/installer.sig \
   && php -r "if (hash('SHA384', file_get_contents('/tmp/composer-setup.php')) !== trim(file_get_contents('/tmp/composer-setup.sig'))) { unlink('/tmp/composer-setup.php'); echo 'Invalid installer' . PHP_EOL; exit(1); }" \
-  && curl -SL "https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2" -o /phantomjs-2.1.1-linux-x86_64.tar.bz2 \
+  && curl -o /usr/local/bin/drush http://files.drush.org/drush.phar \
+  && chmod +x /usr/local/bin/drush \
+  && /usr/local/bin/drush --version \
+
+# Install phantomjs, supervisor
+RUN curl -SL "https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2" -o /phantomjs-2.1.1-linux-x86_64.tar.bz2 \
   && tar -jxf /phantomjs-2.1.1-linux-x86_64.tar.bz2 -C / \
   && mv /phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/bin/phantomjs \
   && rm -f /phantomjs-2.1.1-linux-x86_64.tar.bz2 \
   && rm -rf /phantomjs-2.1.1-linux-x86_64 \
   && chmod 755 /usr/bin/phantomjs \
-  && curl -o /usr/local/bin/drush http://files.drush.org/drush.phar \
-  && chmod +x /usr/local/bin/drush \
-  && /usr/local/bin/drush --version \
-  && apt-get update && apt-get install -y supervisor && rm -rf /var/lib/apt/lists/*
+  && apt-get update \
+  && apt-get install -y supervisor fontconfig \
+  && rm -rf /var/lib/apt/lists/*
 
 COPY ./conf/supervisor-phantomjs.conf /etc/supervisor/conf.d/phantomjs.conf
 
