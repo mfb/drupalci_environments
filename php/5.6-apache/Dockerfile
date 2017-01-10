@@ -233,7 +233,7 @@ RUN curl -o /tmp/composer-setup.php https://getcomposer.org/installer \
   && php -r "if (hash('SHA384', file_get_contents('/tmp/composer-setup.php')) !== trim(file_get_contents('/tmp/composer-setup.sig'))) { unlink('/tmp/composer-setup.php'); echo 'Invalid installer' . PHP_EOL; exit(1); }" \
   && curl -o /usr/local/bin/drush http://files.drush.org/drush.phar \
   && chmod +x /usr/local/bin/drush \
-  && /usr/local/bin/drush --version \
+  && /usr/local/bin/drush --version
 
 # Install phantomjs, supervisor
 RUN curl -SL "https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2" -o /phantomjs-2.1.1-linux-x86_64.tar.bz2 \
