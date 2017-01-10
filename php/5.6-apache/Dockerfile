@@ -169,6 +169,7 @@ RUN set -xe \
             --with-png-dir \
             --with-freetype-dir \
             --with-zlib-dir \
+            --with-jpeg-dir \
             --with-mcrypt \
             --with-xsl \
             --with-tidy \
