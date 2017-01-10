@@ -218,6 +218,7 @@ COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 #    && apt-get install -y bzip2 fontconfig git libc6 libcomerr2 libfontconfig1 libfreetype6 libgcc1 \
 #    libmcrypt4 libgcrypt20 libgpg-error0 libicu52 libjpeg62-turbo libkeyutils1 liblzma5 \
 #    libpng12-0 libpq5 libreadline6 libtidy-0.99-0 libtinfo5 libwebp5 libxslt1.1 libyaml-0-2 zlib1g --no-install-recommends \
+#
 RUN docker-php-ext-pecl-install APCu-4.0.11 xdebug yaml && sed -i 's/^/;/' /usr/local/etc/php/conf.d/docker-php-pecl-xdebug.ini
 
 RUN apt-get update \
