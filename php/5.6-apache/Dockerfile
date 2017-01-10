@@ -213,7 +213,6 @@ COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 #    libyaml-dev \
 #    ncurses-dev \
 #    unzip \
-#    " \
 #    && set -x \
 #    && apt-get update \
 #    && apt-get install -y bzip2 fontconfig git libc6 libcomerr2 libfontconfig1 libfreetype6 libgcc1 \
