@@ -219,7 +219,7 @@ COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 #    libpng12-0 libpq5 libreadline6 libtidy-0.99-0 libtinfo5 libwebp5 libxslt1.1 libyaml-0-2 zlib1g --no-install-recommends \
 #
 RUN docker-php-ext-pecl-install APCu-4.0.11 xdebug yaml \
-    && sed -i 's/^/;/' /usr/local/etc/php/conf.d/docker-php-pecl-xdebug.ini
+    && sed -i 's/^/;/' /usr/local/etc/php/conf.d/docker-php-pecl-xdebug.ini \
     && apt-get update \
     && apt-get install -y mysql-client postgresql-client sudo sqlite3 --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
