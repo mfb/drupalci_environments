@@ -1,46 +1,20 @@
-FROM debian:jessie
+######
+# Base
+######
+FROM ubuntu:trusty
 
-# persistent / runtime deps
-ENV PHPIZE_DEPS \
-		autoconf \
-		file \
-		g++ \
-		gcc \
-		libc-dev \
-		make \
-		pkg-config \
-		re2c
-RUN apt-get update && apt-get install -y \
-		$PHPIZE_DEPS \
-		ca-certificates \
-		curl \
-		libedit2 \
-		libsqlite3-0 \
-		libxml2 \
-		gdb \
-		xz-utils \
-	--no-install-recommends && rm -r /var/lib/apt/lists/*
+ENV DRUPALCI TRUE
 
-ENV PHP_INI_DIR /usr/local/etc/php
-RUN mkdir -p $PHP_INI_DIR/conf.d
-
-RUN apt-get update && apt-get install -y apache2-bin apache2.2-common apache2-dbg --no-install-recommends && rm -rf /var/lib/apt/lists/*
-
-ENV APACHE_CONFDIR /etc/apache2
-ENV APACHE_ENVVARS $APACHE_CONFDIR/envvars
+######
+# Apache Setup
+######
+RUN apt-get update && apt-get install -y apache2-bin apache2-dbg --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 RUN set -ex \
 	\
-# generically convert lines like
-#   export APACHE_RUN_USER=www-data
-# into
-#   : ${APACHE_RUN_USER:=www-data}
-#   export APACHE_RUN_USER
-# so that they can be overridden at runtime ("-e APACHE_RUN_USER=...")
-	&& sed -r 's/^export ([^=]+)=(.*)$/: ${\1:=\2}\nexport \1/' "$APACHE_ENVVARS" \
+	&& sed -ri 's/^export ([^=]+)=(.*)$/: ${\1:=\2}\nexport \1/' /etc/apache2/envvars \
 	\
-# setup directories and permissions
-	&& . "$APACHE_ENVVARS" \
+	&& . /etc/apache2/envvars \
 	&& for dir in \
 		"$APACHE_LOCK_DIR" \
 		"$APACHE_RUN_DIR" \
@@ -55,13 +29,6 @@ RUN set -ex \
 # Apache + PHP requires preforking Apache for best results
 RUN a2dismod mpm_event && a2enmod mpm_prefork
 
-# logs should go to stdout / stderr
-RUN set -ex \
-	&& . "$APACHE_ENVVARS" \
-	&& ln -sfT /dev/stderr "$APACHE_LOG_DIR/error.log" \
-	&& ln -sfT /dev/stdout "$APACHE_LOG_DIR/access.log" \
-	&& ln -sfT /dev/stdout "$APACHE_LOG_DIR/other_vhosts_access.log"
-
 # PHP files should be handled by PHP, and should be preferred over any other file type
 RUN { \
 		echo '<FilesMatch \.php$>'; \
@@ -75,77 +42,64 @@ RUN { \
 		echo '\tOptions -Indexes'; \
 		echo '\tAllowOverride All'; \
 		echo '</Directory>'; \
-	} | tee "$APACHE_CONFDIR/conf-available/docker-php.conf" \
+	} | tee /etc/apache2/conf-available/docker-php.conf \
 	&& a2enconf docker-php
 
-ENV PHP_EXTRA_BUILD_DEPS apache2-dev
-ENV PHP_EXTRA_CONFIGURE_ARGS --with-apxs2
+COPY ./conf/apache2/vhost.conf /etc/apache2/sites-available/drupal.conf
 
-ENV GPG_KEYS 0B96609E270F565C13292B24C13C70B87267B52D 0BD78B5F97500D450838F95DFE857D9A90D90EC1 F38252826ACD957EF380D39F2F7956BC5DA04B5D
+RUN a2enmod rewrite \
+    && a2dissite 000-default.conf \
+    && a2ensite drupal
 
-ENV PHP_VERSION 5.5.9
-ENV PHP_FILENAME php-5.5.9.tar.xz
-ENV PHP_MD5 139e2ac02fddd4c80cc31de000c6f7e3
+RUN mkdir -p /usr/local/etc/php/conf.d
 
+RUN apt-get update && apt-get install -y \
+		php5 \
+        php5-cgi \
+        php5-cli \
+        php5-common \
+        php5-curl \
+        php5-gd \
+        php5-json \
+        php5-ldap \
+        php5-mysql \
+        php5-odbc \
+        php5-pgsql \
+        php5-sqlite \
+        php5-tidy \
+        php5-xmlrpc \
+        php5-xsl \
+        php5-apcu \
+		ca-certificates \
+		curl \
+	--no-install-recommends && rm -r /var/lib/apt/lists/*
 
+COPY ./conf/php/php.ini /etc/php/cgi/php.ini
+COPY ./conf/php/php-cli.ini /etc/php/cli/php.ini
 
-RUN set -xe \
-	&& cd /usr/src \
-	&& curl -fSL "http://php.net/get/$PHP_FILENAME/from/this/mirror" -o php.tar.xz \
-	&& echo "$PHP_MD5 *php.tar.xz" | md5sum -c - \
-	&& curl -fSL "http://php.net/get/$PHP_FILENAME.asc/from/this/mirror" -o php.tar.xz.asc \
-	&& export GNUPGHOME="$(mktemp -d)" \
-	&& for key in $GPG_KEYS; do \
-		gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-	done \
-	&& gpg --batch --verify php.tar.xz.asc php.tar.xz \
-	&& rm -r "$GNUPGHOME"
+# Install Composer, Drush
+RUN curl -o /tmp/composer-setup.php https://getcomposer.org/installer \
+  && curl -o /tmp/composer-setup.sig https://composer.github.io/installer.sig \
+  && php -r "if (hash('SHA384', file_get_contents('/tmp/composer-setup.php')) !== trim(file_get_contents('/tmp/composer-setup.sig'))) { unlink('/tmp/composer-setup.php'); echo 'Invalid installer' . PHP_EOL; exit(1); }" \
+  && curl -o /usr/local/bin/drush http://files.drush.org/drush.phar \
+  && chmod +x /usr/local/bin/drush \
+  && /usr/local/bin/drush --version
 
-COPY docker-php-source /usr/local/bin/
+# Install phantomjs, supervisor
+RUN curl -SL "https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2" -o /phantomjs-2.1.1-linux-x86_64.tar.bz2 \
+  && tar -jxf /phantomjs-2.1.1-linux-x86_64.tar.bz2 -C / \
+  && mv /phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/bin/phantomjs \
+  && rm -f /phantomjs-2.1.1-linux-x86_64.tar.bz2 \
+  && rm -rf /phantomjs-2.1.1-linux-x86_64 \
+  && chmod 755 /usr/bin/phantomjs \
+  && apt-get update \
+  && apt-get install -y supervisor fontconfig \
+  && rm -rf /var/lib/apt/lists/*
 
-RUN set -xe \
-	&& buildDeps=" \
-		$PHP_EXTRA_BUILD_DEPS \
-		libcurl4-openssl-dev \
-		libedit-dev \
-		libsqlite3-dev \
-		libssl-dev \
-		libxml2-dev \
-	" \
-	&& apt-get update && apt-get install -y $buildDeps --no-install-recommends && rm -rf /var/lib/apt/lists/* \
-	\
-	&& docker-php-source extract \
-	&& cd /usr/src/php \
-	&& ./configure \
-		--with-config-file-path="$PHP_INI_DIR" \
-		--with-config-file-scan-dir="$PHP_INI_DIR/conf.d" \
-		\
-		--disable-cgi \
-		\
-# --enable-ftp is included here because ftp_ssl_connect() needs ftp to be compiled statically (see https://github.com/docker-library/php/issues/236)
-		--enable-ftp \
-# --enable-mbstring is included here because otherwise there's no way to get pecl to use it properly (see https://github.com/docker-library/php/issues/195)
-		--enable-mbstring \
-# --enable-mysqlnd is included here because it's harder to compile after the fact than extensions are (since it's a plugin for several extensions, not an extension in itself)
-		--enable-mysqlnd \
-		\
-		--with-curl \
-		--with-libedit \
-		--with-openssl \
-		--with-zlib \
-		--enable-debug \
-		\
-		$PHP_EXTRA_CONFIGURE_ARGS \
-	&& make -j"$(nproc)" \
-	&& make install \
-	&& { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
-	&& make clean \
-	&& docker-php-source delete \
-	\
-	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps
+COPY ./conf/supervisor-phantomjs.conf /etc/supervisor/conf.d/phantomjs.conf
+COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
-COPY docker-php-ext-* /usr/local/bin/
-
+ENTRYPOINT ["docker-php-entrypoint"]
 
 COPY apache2-foreground /usr/local/bin/
 WORKDIR /var/www/html
