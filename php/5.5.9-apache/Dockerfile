@@ -5,7 +5,7 @@ FROM ubuntu:trusty
 
 ENV DRUPALCI TRUE
 
-######
+#######
 # Apache Setup
 ######
 RUN apt-get update && apt-get install -y apache2-bin apache2-dbg --no-install-recommends && rm -rf /var/lib/apt/lists/*
