@@ -57,17 +57,17 @@ RUN a2enmod rewrite \
 ######
 RUN apt-get update && apt-get install -y --no-install-recommends \
         autoconf \
+		ca-certificates \
+		curl \
 		file \
 		g++ \
 		gcc \
+		gdb \
 		libc-dev \
+		libedit2 \
 		make \
 		pkg-config \
 		re2c \
-		ca-certificates \
-		curl \
-		libedit2 \
-		gdb \
 		xz-utils \
 		&& rm -rf /var/lib/apt/lists/*
 
@@ -77,9 +77,6 @@ ENV PHP_CFLAGS="-O2 -g"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS=""
 
-#######
-#  ** per version **
-######
 ENV GPG_KEYS 0BD78B5F97500D450838F95DFE857D9A90D90EC1 6E4F6AB321FDC07F2C332E3AC2BF0BC433CFC8B3
 
 ENV PHP_VERSION 5.6.29
@@ -123,24 +120,23 @@ COPY docker-php-source /usr/local/bin/
 
 RUN set -xe \
 	&& buildDeps=" \
-		apache2-dev \
-		libcurl4-openssl-dev \
-		libedit-dev \
-		libsqlite3-dev \
-		libssl-dev \
-		libxml2-dev \
-        libicu-dev \
+        apache2-dev \
+        libcurl4-openssl-dev \
+        libedit-dev \
         libfreetype6-dev \
+        libicu-dev \
         libjpeg62-turbo-dev \
         libmcrypt-dev \
         libpng12-dev \
         libpq-dev \
+        libsqlite3-dev \
         libssl-dev \
         libtidy-dev \
+        libxml2-dev \
         libxslt1-dev \
         libyaml-dev \
         ncurses-dev \
-	" \
+    " \
 	&& apt-get update && apt-get install -y $buildDeps --no-install-recommends && rm -rf /var/lib/apt/lists/* \
 	\
 	&& docker-php-source extract \
@@ -200,24 +196,7 @@ RUN set -xe \
 
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
-#RUN buildDeps=" \
-#    libicu-dev \
-#    libfreetype6-dev \
-#    libjpeg62-turbo-dev \
-#    libmcrypt-dev \
-#    libpng12-dev \
-#    libpq-dev \
-#    libssl-dev \
-#    libtidy-dev \
-#    libxslt1-dev \
-#    libyaml-dev \
-#    ncurses-dev \
-#    unzip \
-
-#    apt-get install -y bzip2  git libc6 libcomerr2 libfontconfig1 libfreetype6 libgcc1 \
-#    libmcrypt4 libgcrypt20 libgpg-error0 libicu52 libjpeg62-turbo libkeyutils1 liblzma5 \
-#    libpng12-0 libpq5 libreadline6 libtidy-0.99-0 libtinfo5 libwebp5 libxslt1.1 libyaml-0-2 zlib1g --no-install-recommends \
-#
+# install pecl extensions for apcu, xdebug, and yaml
 RUN docker-php-ext-pecl-install APCu-4.0.11 xdebug yaml \
     && sed -i 's/^/;/' /usr/local/etc/php/conf.d/docker-php-pecl-xdebug.ini \
     && apt-get update \
