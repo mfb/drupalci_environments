@@ -1,5 +1,3 @@
-FROM debian:jessie
-
 ######
 # Base
 ######
