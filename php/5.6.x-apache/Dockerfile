@@ -123,58 +123,58 @@ RUN set -xe \
 	\
 	&& docker-php-source extract \
 	&& cd /usr/src/php \
-	&& export CFLAGS="$PHP_CFLAGS" \
-		CPPFLAGS="$PHP_CPPFLAGS" \
-		LDFLAGS="$PHP_LDFLAGS" \
+	&& export CFLAGS="-O2 -g" \
+		CPPFLAGS="-O2 -g" \
+		LDFLAGS="" \
 	&& ./buildconf \
 	&& ./configure \
-        		--with-config-file-path=/usr/local/etc/php \
-        		--with-config-file-scan-dir=/usr/local/etc/php/conf.d \
-        		--enable-ftp \
-        		--enable-mbstring \
-        		--enable-mysqlnd \
-        		--with-curl \
-        		--with-libedit \
-        		--with-openssl \
-        		--with-zlib \
-        		--with-kerberos \
-                --with-openssl \
-                --with-mysql=mysqlnd \
-                --with-mysqli=mysqlnd \
-                --with-pdo-mysql=mysqlnd \
-                --with-pdo-sqlite \
-                --with-pdo-pgsql \
-                --with-readline \
-                --with-png-dir \
-                --with-freetype-dir \
-                --with-zlib-dir \
-                --with-jpeg-dir \
-                --with-mcrypt \
-                --with-xsl \
-                --with-tidy \
-                --with-xmlrpc \
-                --with-gettext=shared \
-        		--with-gd \
-                --with-pear \
-                --enable-sockets \
-                --enable-exif \
-                --enable-zip \
-                --enable-soap \
-                --enable-sysvsem \
-                --enable-cgi \
-                --enable-sysvshm \
-                --enable-shmop \
-                --enable-pcntl \
-                --enable-bcmath \
-                --enable-xmlreader \
-                --enable-intl \
-                --enable-wddx \
-                --enable-opcache \
-        		--with-apxs2 \
-        	&& make -j "$(nproc)" \
-        	&& make install \
-        	&& { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
-        	&& make clean
+    		--with-config-file-path=/usr/local/etc/php \
+    		--with-config-file-scan-dir=/usr/local/etc/php/conf.d \
+    		--enable-ftp \
+    		--enable-mbstring \
+    		--enable-mysqlnd \
+    		--with-curl \
+    		--with-libedit \
+    		--with-openssl \
+    		--with-zlib \
+    		--with-kerberos \
+            --with-openssl \
+            --with-mysql=mysqlnd \
+            --with-mysqli=mysqlnd \
+            --with-pdo-mysql=mysqlnd \
+            --with-pdo-sqlite \
+            --with-pdo-pgsql \
+            --with-readline \
+            --with-png-dir \
+            --with-freetype-dir \
+            --with-zlib-dir \
+            --with-jpeg-dir \
+            --with-mcrypt \
+            --with-xsl \
+            --with-tidy \
+            --with-xmlrpc \
+            --with-gettext=shared \
+    		--with-gd \
+            --with-pear \
+            --enable-sockets \
+            --enable-exif \
+            --enable-zip \
+            --enable-soap \
+            --enable-sysvsem \
+            --enable-cgi \
+            --enable-sysvshm \
+            --enable-shmop \
+            --enable-pcntl \
+            --enable-bcmath \
+            --enable-xmlreader \
+            --enable-intl \
+            --enable-wddx \
+            --enable-opcache \
+    		--with-apxs2 \
+    	&& make -j "$(nproc)" \
+    	&& make install \
+    	&& { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
+    	&& make clean
 
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
