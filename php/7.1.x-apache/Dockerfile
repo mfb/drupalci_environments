@@ -51,7 +51,7 @@ RUN a2enmod rewrite \
     && a2dissite 000-default.conf \
     && a2ensite drupal
 
-#######
+########
 # Php Setup
 #######
 RUN apt-get update && apt-get install -y --no-install-recommends \
