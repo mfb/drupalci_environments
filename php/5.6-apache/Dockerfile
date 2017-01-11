@@ -1,6 +1,6 @@
 ######
 # Base
-######
+#####
 FROM debian:jessie
 
 ENV DRUPALCI TRUE
@@ -50,7 +50,6 @@ COPY ./conf/apache2/vhost.conf /etc/apache2/sites-available/drupal.conf
 RUN a2enmod rewrite \
     && a2dissite 000-default.conf \
     && a2ensite drupal
-
 
 ######
 # Php Setup
