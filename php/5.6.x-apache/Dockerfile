@@ -67,7 +67,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		curl \
 		libedit2 \
 		gdb \
-		bison \
 		unzip \
 		&& rm -rf /var/lib/apt/lists/*
 
@@ -96,6 +95,10 @@ RUN set -xe; \
 	\
 	wget -O php.zip "$PHP_URL"; \
 	\
+	wget http://launchpadlibrarian.net/140087283/libbison-dev_2.7.1.dfsg-1_amd64.deb \
+    wget http://launchpadlibrarian.net/140087282/bison_2.7.1.dfsg-1_amd64.deb \
+    dpkg -i libbison-dev_2.7.1.dfsg-1_amd64.deb \
+    dpkg -i bison_2.7.1.dfsg-1_amd64.deb \
 	apt-get purge -y --auto-remove $fetchDeps
 
 COPY docker-php-source /usr/local/bin/
