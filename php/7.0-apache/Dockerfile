@@ -1,47 +1,22 @@
 FROM debian:jessie
 
-# persistent / runtime deps
-ENV PHPIZE_DEPS \
-		autoconf \
-		file \
-		g++ \
-		gcc \
-		libc-dev \
-		make \
-		pkg-config \
-		re2c
-RUN apt-get update && apt-get install -y \
-		$PHPIZE_DEPS \
-		ca-certificates \
-		curl \
-		libedit2 \
-		libsqlite3-0 \
-		libxml2 \
-		gdb \
-		xz-utils \
-	--no-install-recommends && rm -r /var/lib/apt/lists/*
+######
+# Base
+######
+FROM debian:jessie
 
-ENV PHP_INI_DIR /usr/local/etc/php
-RUN mkdir -p $PHP_INI_DIR/conf.d
+ENV DRUPALCI TRUE
 
-
+######
+# Apache Setup
+######
 RUN apt-get update && apt-get install -y apache2-bin apache2.2-common apache2-dbg --no-install-recommends && rm -rf /var/lib/apt/lists/*
-
-ENV APACHE_CONFDIR /etc/apache2
-ENV APACHE_ENVVARS $APACHE_CONFDIR/envvars
 
 RUN set -ex \
 	\
-# generically convert lines like
-#   export APACHE_RUN_USER=www-data
-# into
-#   : ${APACHE_RUN_USER:=www-data}
-#   export APACHE_RUN_USER
-# so that they can be overridden at runtime ("-e APACHE_RUN_USER=...")
-	&& sed -ri 's/^export ([^=]+)=(.*)$/: ${\1:=\2}\nexport \1/' "$APACHE_ENVVARS" \
+	&& sed -ri 's/^export ([^=]+)=(.*)$/: ${\1:=\2}\nexport \1/' /etc/apache2/envvars \
 	\
-# setup directories and permissions
-	&& . "$APACHE_ENVVARS" \
+	&& . /etc/apache2/envvars \
 	&& for dir in \
 		"$APACHE_LOCK_DIR" \
 		"$APACHE_RUN_DIR" \
@@ -56,13 +31,6 @@ RUN set -ex \
 # Apache + PHP requires preforking Apache for best results
 RUN a2dismod mpm_event && a2enmod mpm_prefork
 
-# logs should go to stdout / stderr
-RUN set -ex \
-	&& . "$APACHE_ENVVARS" \
-	&& ln -sfT /dev/stderr "$APACHE_LOG_DIR/error.log" \
-	&& ln -sfT /dev/stdout "$APACHE_LOG_DIR/access.log" \
-	&& ln -sfT /dev/stdout "$APACHE_LOG_DIR/other_vhosts_access.log"
-
 # PHP files should be handled by PHP, and should be preferred over any other file type
 RUN { \
 		echo '<FilesMatch \.php$>'; \
@@ -76,22 +44,41 @@ RUN { \
 		echo '\tOptions -Indexes'; \
 		echo '\tAllowOverride All'; \
 		echo '</Directory>'; \
-	} | tee "$APACHE_CONFDIR/conf-available/docker-php.conf" \
+	} | tee /etc/apache2/conf-available/docker-php.conf \
 	&& a2enconf docker-php
 
-ENV PHP_EXTRA_BUILD_DEPS apache2-dev
-ENV PHP_EXTRA_CONFIGURE_ARGS --with-apxs2
+COPY ./conf/apache2/vhost.conf /etc/apache2/sites-available/drupal.conf
 
+RUN a2enmod rewrite \
+    && a2dissite 000-default.conf \
+    && a2ensite drupal
 
-# Apply stack smash protection to functions using local buffers and alloca()
-# Make PHP's main executable position-independent (improves ASLR security mechanism, and has no performance impact on x86_64)
-# Enable optimization (-O2)
-# Enable linker optimization (this sorts the hash buckets to improve cache locality, and is non-default)
-# Adds GNU HASH segments to generated executables (this is used if present, and is much faster than sysv hash; in this configuration, sysv hash is also generated)
-# https://github.com/docker-library/php/issues/272
-ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
+######
+# Php Setup
+######
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        autoconf \
+		ca-certificates \
+		curl \
+		file \
+		g++ \
+		gcc \
+		gdb \
+		libc-dev \
+		libedit2 \
+		libsqlite3-0 \
+		libxml2 \
+		make \
+		pkg-config \
+		re2c \
+		xz-utils \
+		&& rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /usr/local/etc/php/conf.d
+
+ENV PHP_CFLAGS="-O2 -g"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
-ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
+ENV PHP_LDFLAGS=""
 
 ENV GPG_KEYS 1A4E8B7277C42E53DBA9C7B9BCAA30EA9C0D5763
 
@@ -136,49 +123,112 @@ COPY docker-php-source /usr/local/bin/
 
 RUN set -xe \
 	&& buildDeps=" \
-		$PHP_EXTRA_BUILD_DEPS \
-		libcurl4-openssl-dev \
-		libedit-dev \
-		libsqlite3-dev \
-		libssl-dev \
-		libxml2-dev \
-	" \
+        apache2-dev \
+        libcurl4-openssl-dev \
+        libedit-dev \
+        libfreetype6-dev \
+        libicu-dev \
+        libjpeg62-turbo-dev \
+        libmcrypt-dev \
+        libpng12-dev \
+        libpq-dev \
+        libsqlite3-dev \
+        libssl-dev \
+        libtidy-dev \
+        libxml2-dev \
+        libxslt1-dev \
+        libyaml-dev \
+        ncurses-dev \
+    " \
 	&& apt-get update && apt-get install -y $buildDeps --no-install-recommends && rm -rf /var/lib/apt/lists/* \
 	\
-	&& export CFLAGS="$PHP_CFLAGS" \
-		CPPFLAGS="$PHP_CPPFLAGS" \
-		LDFLAGS="$PHP_LDFLAGS" \
 	&& docker-php-source extract \
 	&& cd /usr/src/php \
+	&& export CFLAGS="-O2 -g" \
+		CPPFLAGS="-O2 -g" \
+		LDFLAGS="" \
 	&& ./configure \
-		--with-config-file-path="$PHP_INI_DIR" \
-		--with-config-file-scan-dir="$PHP_INI_DIR/conf.d" \
-		\
-		--disable-cgi \
-		\
-# --enable-ftp is included here because ftp_ssl_connect() needs ftp to be compiled statically (see https://github.com/docker-library/php/issues/236)
-		--enable-ftp \
-# --enable-mbstring is included here because otherwise there's no way to get pecl to use it properly (see https://github.com/docker-library/php/issues/195)
-		--enable-mbstring \
-# --enable-mysqlnd is included here because it's harder to compile after the fact than extensions are (since it's a plugin for several extensions, not an extension in itself)
-		--enable-mysqlnd \
-		\
-		--with-curl \
-		--with-libedit \
-		--with-openssl \
-		--with-zlib \
-		--enable-debug \
-		\
-		$PHP_EXTRA_CONFIGURE_ARGS \
-	&& make -j "$(nproc)" \
-	&& make install \
-	&& { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
-	&& make clean \
-    && docker-php-source delete \
-	\
-	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps
+    		--with-config-file-path=/usr/local/etc/php \
+    		--with-config-file-scan-dir=/usr/local/etc/php/conf.d \
+    		--enable-ftp \
+    		--enable-mbstring \
+    		--enable-mysqlnd \
+    		--with-curl \
+    		--with-libedit \
+    		--with-openssl \
+    		--with-zlib \
+    		--with-kerberos \
+            --with-openssl \
+            --with-mysql=mysqlnd \
+            --with-mysqli=mysqlnd \
+            --with-pdo-mysql=mysqlnd \
+            --with-pdo-sqlite \
+            --with-pdo-pgsql \
+            --with-readline \
+            --with-png-dir \
+            --with-freetype-dir \
+            --with-zlib-dir \
+            --with-jpeg-dir \
+            --with-mcrypt \
+            --with-xsl \
+            --with-tidy \
+            --with-xmlrpc \
+            --with-gettext=shared \
+    		--with-gd \
+            --with-pear \
+            --enable-sockets \
+            --enable-exif \
+            --enable-zip \
+            --enable-soap \
+            --enable-sysvsem \
+            --enable-cgi \
+            --enable-sysvshm \
+            --enable-shmop \
+            --enable-pcntl \
+            --enable-bcmath \
+            --enable-xmlreader \
+            --enable-intl \
+            --enable-wddx \
+            --enable-opcache \
+    		--with-apxs2 \
+    	&& make -j "$(nproc)" \
+    	&& make install \
+    	&& { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
+    	&& make clean
+
 
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
+
+# install pecl extensions for apcu, xdebug, and yaml
+RUN docker-php-ext-pecl-install APCu xdebug yaml \
+    && sed -i 's/^/;/' /usr/local/etc/php/conf.d/docker-php-pecl-xdebug.ini \
+    && apt-get update \
+    && apt-get install -y mysql-client postgresql-client sudo sqlite3 --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY ./conf/php/php.ini /usr/local/etc/php/php.ini
+COPY ./conf/php/php-cli.ini /usr/local/etc/php/php-cli.ini
+
+# Install Composer, Drush
+RUN curl -o /tmp/composer-setup.php https://getcomposer.org/installer \
+  && curl -o /tmp/composer-setup.sig https://composer.github.io/installer.sig \
+  && php -r "if (hash('SHA384', file_get_contents('/tmp/composer-setup.php')) !== trim(file_get_contents('/tmp/composer-setup.sig'))) { unlink('/tmp/composer-setup.php'); echo 'Invalid installer' . PHP_EOL; exit(1); }" \
+  && curl -o /usr/local/bin/drush http://files.drush.org/drush.phar \
+  && chmod +x /usr/local/bin/drush \
+  && /usr/local/bin/drush --version
+
+# Install phantomjs, supervisor
+RUN curl -SL "https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2" -o /phantomjs-2.1.1-linux-x86_64.tar.bz2 \
+  && tar -jxf /phantomjs-2.1.1-linux-x86_64.tar.bz2 -C / \
+  && mv /phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/bin/phantomjs \
+  && rm -f /phantomjs-2.1.1-linux-x86_64.tar.bz2 \
+  && rm -rf /phantomjs-2.1.1-linux-x86_64 \
+  && chmod 755 /usr/bin/phantomjs \
+  && apt-get update \
+  && apt-get install -y supervisor fontconfig \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY ./conf/supervisor-phantomjs.conf /etc/supervisor/conf.d/phantomjs.conf
 
 ENTRYPOINT ["docker-php-entrypoint"]
 
@@ -187,4 +237,3 @@ WORKDIR /var/www/html
 
 EXPOSE 80
 CMD ["apache2-foreground"]
-
