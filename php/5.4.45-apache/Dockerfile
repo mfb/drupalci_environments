@@ -179,7 +179,7 @@ RUN set -xe \
 
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
-# install pecl extensions for apcu, xdebug, and yaml
+# install pecl extensions for apc, xdebug, and yaml
 RUN docker-php-ext-pecl-install APC-3.1.13 xdebug-2.4.1 \
     && sed -i 's/^/;/' /usr/local/etc/php/conf.d/docker-php-pecl-xdebug.ini \
     && apt-get update \
