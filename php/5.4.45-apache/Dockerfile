@@ -4,7 +4,7 @@
 FROM debian:jessie
 
 ENV DRUPALCI TRUE
-
+ENV TERM xterm
 ######
 # Apache Setup
 ######

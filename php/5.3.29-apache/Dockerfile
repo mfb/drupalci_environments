@@ -1,57 +1,21 @@
+######
+# Base
+#####
 FROM debian:jessie
 
-# persistent / runtime deps
-ENV PHPIZE_DEPS \
-		autoconf2.13 \
-		file \
-		g++ \
-		gcc \
-		libc-dev \
-		make \
-		pkg-config \
-		re2c
-RUN apt-get update && apt-get install -y \
-		$PHPIZE_DEPS \
-		ca-certificates \
-		curl \
-		libedit2 \
-		libsqlite3-0 \
-		libxml2 \
-		gdb \
-		libmysqlclient-dev \
-		libssl-dev \
-		libcurl4-openssl-dev \
-		xz-utils \
-	--no-install-recommends && rm -r /var/lib/apt/lists/*
+ENV DRUPALCI TRUE
+ENV TERM xterm
 
-RUN set -x \
-    	&& curl -SLO http://launchpadlibrarian.net/140087283/libbison-dev_2.7.1.dfsg-1_amd64.deb \
-    	&& curl -SLO http://launchpadlibrarian.net/140087282/bison_2.7.1.dfsg-1_amd64.deb \
-    	&& dpkg -i libbison-dev_2.7.1.dfsg-1_amd64.deb \
-    	&& dpkg -i bison_2.7.1.dfsg-1_amd64.deb \
-    	&& rm *.deb
-
-ENV PHP_INI_DIR /usr/local/etc/php
-RUN mkdir -p $PHP_INI_DIR/conf.d
-
-
+######
+# Apache Setup
+######
 RUN apt-get update && apt-get install -y apache2-bin apache2.2-common apache2-dbg --no-install-recommends && rm -rf /var/lib/apt/lists/*
-
-ENV APACHE_CONFDIR /etc/apache2
-ENV APACHE_ENVVARS $APACHE_CONFDIR/envvars
 
 RUN set -ex \
 	\
-# generically convert lines like
-#   export APACHE_RUN_USER=www-data
-# into
-#   : ${APACHE_RUN_USER:=www-data}
-#   export APACHE_RUN_USER
-# so that they can be overridden at runtime ("-e APACHE_RUN_USER=...")
-	&& sed -ri 's/^export ([^=]+)=(.*)$/: ${\1:=\2}\nexport \1/' "$APACHE_ENVVARS" \
+	&& sed -ri 's/^export ([^=]+)=(.*)$/: ${\1:=\2}\nexport \1/' /etc/apache2/envvars \
 	\
-# setup directories and permissions
-	&& . "$APACHE_ENVVARS" \
+	&& . /etc/apache2/envvars \
 	&& for dir in \
 		"$APACHE_LOCK_DIR" \
 		"$APACHE_RUN_DIR" \
@@ -66,13 +30,6 @@ RUN set -ex \
 # Apache + PHP requires preforking Apache for best results
 RUN a2dismod mpm_event && a2enmod mpm_prefork
 
-# logs should go to stdout / stderr
-RUN set -ex \
-	&& . "$APACHE_ENVVARS" \
-	&& ln -sfT /dev/stderr "$APACHE_LOG_DIR/error.log" \
-	&& ln -sfT /dev/stdout "$APACHE_LOG_DIR/access.log" \
-	&& ln -sfT /dev/stdout "$APACHE_LOG_DIR/other_vhosts_access.log"
-
 # PHP files should be handled by PHP, and should be preferred over any other file type
 RUN { \
 		echo '<FilesMatch \.php$>'; \
@@ -86,28 +43,48 @@ RUN { \
 		echo '\tOptions -Indexes'; \
 		echo '\tAllowOverride All'; \
 		echo '</Directory>'; \
-	} | tee "$APACHE_CONFDIR/conf-available/docker-php.conf" \
+	} | tee /etc/apache2/conf-available/docker-php.conf \
 	&& a2enconf docker-php
 
-ENV PHP_EXTRA_BUILD_DEPS apache2-dev
-ENV PHP_EXTRA_CONFIGURE_ARGS --with-apxs2
+COPY ./conf/apache2/vhost.conf /etc/apache2/sites-available/drupal.conf
 
+RUN a2enmod rewrite \
+    && a2dissite 000-default.conf \
+    && a2ensite drupal
+######
+# Php Setup
+######
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        autoconf2.13 \
+		ca-certificates \
+		curl \
+		file \
+		g++ \
+		gcc \
+		gdb \
+		libc-dev \
+		libedit2 \
+		librecode0 \
+        libsqlite3-0 \
+		libxml2 \
+		make \
+		pkg-config \
+		re2c \
+		xz-utils \
+        libmysqlclient-dev \
+		&& rm -rf /var/lib/apt/lists/*
 
-# Apply stack smash protection to functions using local buffers and alloca()
-# Make PHP's main executable position-independent (improves ASLR security mechanism, and has no performance impact on x86_64)
-# Enable optimization (-O2)
-# Enable linker optimization (this sorts the hash buckets to improve cache locality, and is non-default)
-# Adds GNU HASH segments to generated executables (this is used if present, and is much faster than sysv hash; in this configuration, sysv hash is also generated)
-# https://github.com/docker-library/php/issues/272
-ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2"
-ENV PHP_CPPFLAGS="$PHP_CFLAGS"
-ENV PHP_LDFLAGS="-Wl,-O1 -Wl,--hash-style=both -pie"
+RUN set -x \
+    	&& curl -SLO http://launchpadlibrarian.net/140087283/libbison-dev_2.7.1.dfsg-1_amd64.deb \
+    	&& curl -SLO http://launchpadlibrarian.net/140087282/bison_2.7.1.dfsg-1_amd64.deb \
+    	&& dpkg -i libbison-dev_2.7.1.dfsg-1_amd64.deb \
+    	&& dpkg -i bison_2.7.1.dfsg-1_amd64.deb \
+    	&& rm *.deb
 
-ENV GPG_KEYS 0B96609E270F565C13292B24C13C70B87267B52D 0A95E9A026542D53835E3F3A7DEC4E69FC9C83D7
+RUN mkdir -p /usr/local/etc/php/conf.d
 
 ENV PHP_VERSION 5.3.29
-ENV PHP_URL="https://secure.php.net/get/php-5.3.29.tar.xz/from/this/mirror" PHP_ASC_URL="https://secure.php.net/get/php-5.3.29.tar.xz.asc/from/this/mirror"
-ENV PHP_SHA256="0ff352a433f73e2c82b0d5b283b600402518569bf72a74e247f356dacbf322a7" PHP_MD5="dcff9c881fe436708c141cfc56358075"
+ENV PHP_URL="https://secure.php.net/get/php-5.3.29.tar.gz/from/this/mirror"
 
 RUN set -xe; \
 	\
@@ -121,75 +98,123 @@ RUN set -xe; \
 	mkdir -p /usr/src; \
 	cd /usr/src; \
 	\
-	wget -O php.tar.xz "$PHP_URL"; \
-	\
-	if [ -n "$PHP_MD5" ]; then \
-		echo "$PHP_MD5 *php.tar.xz" | md5sum -c -; \
-	fi; \
-	\
-	if [ -n "$PHP_ASC_URL" ]; then \
-		wget -O php.tar.xz.asc "$PHP_ASC_URL"; \
-		export GNUPGHOME="$(mktemp -d)"; \
-		for key in $GPG_KEYS; do \
-			gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-		done; \
-		gpg --batch --verify php.tar.xz.asc php.tar.xz; \
-		rm -r "$GNUPGHOME"; \
-	fi; \
+	wget -O php.tar.gz "$PHP_URL"; \
 	\
 	apt-get purge -y --auto-remove $fetchDeps
 
 COPY docker-php-source /usr/local/bin/
 
 RUN set -xe \
-	&& buildDeps=" \
-		$PHP_EXTRA_BUILD_DEPS \
-		libcurl4-openssl-dev \
-		libedit-dev \
-		libsqlite3-dev \
-		libssl-dev \
-		libxml2-dev \
+    	&& buildDeps=" \
+        apache2-dev \
+        libedit-dev \
+        libcurl4-openssl-dev \
+        libfreetype6-dev \
+        libicu-dev \
+        libjpeg62-turbo-dev \
+        libmcrypt-dev \
+        libpng12-dev \
+        libpq-dev \
+        libsqlite3-dev \
+        libtidy-dev \
+        libxml2-dev \
+        libxslt1-dev \
+        libyaml-dev \
+        ncurses-dev \
+		bzip2 \
+		libreadline6-dev \
+		librecode-dev \
 	" \
 	&& apt-get update && apt-get install -y $buildDeps --no-install-recommends && rm -rf /var/lib/apt/lists/* \
-	\
-	&& export CFLAGS="$PHP_CFLAGS" \
-		CPPFLAGS="$PHP_CPPFLAGS" \
-		LDFLAGS="$PHP_LDFLAGS" \
-	&& docker-php-source extract \
-	&& cd /usr/src/php \
-	&& ./buildconf --force \
-	&& ./configure \
-		--with-config-file-path="$PHP_INI_DIR" \
-		--with-config-file-scan-dir="$PHP_INI_DIR/conf.d" \
-		\
-		--disable-cgi \
-		\
-# --enable-ftp is included here because ftp_ssl_connect() needs ftp to be compiled statically (see https://github.com/docker-library/php/issues/236)
-		--enable-ftp \
-# --enable-mbstring is included here because otherwise there's no way to get pecl to use it properly (see https://github.com/docker-library/php/issues/195)
-		--enable-mbstring \
-        \
-		--with-mysql \
-        --with-mysqli \
-        --with-pdo-mysql \
-		\
-		--with-curl \
-		--with-libedit \
-		--with-zlib \
-		--enable-debug \
-		\
-		$PHP_EXTRA_CONFIGURE_ARGS \
-	&& make -j "$(nproc)" \
-	&& make install \
-	&& { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
-	&& make clean \
-	#	&& docker-php-source delete \
-	\
-	&& dpkg -r bison libbison-dev \
-	&& apt-get purge -y --auto-remove autoconf2.13 \
-	&& apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps
+    	\
+    	&& docker-php-source extract \
+         && cd /usr/src/php \
+         && mkdir -p /usr/include/freetype2/freetype \
+         && ln -s /usr/include/freetype2/freetype.h /usr/include/freetype2/freetype/freetype.h \
+         && export CFLAGS="-O2 -g" \
+    		CPPFLAGS="-O2 -g" \
+    		LDFLAGS="" \
+    	&& ./buildconf --force
+RUN set -xe \
+        && cd /usr/src/php \
+    	&& ./configure \
+        		--with-config-file-path=/usr/local/etc/php \
+        		--with-config-file-scan-dir=/usr/local/etc/php/conf.d \
+        		--enable-ftp \
+        		--with-libdir=/lib/x86_64-linux-gnu \
+        		--enable-mbstring \
+        		--enable-mysqlnd \
+        		--with-curl \
+        		--with-libedit \
+        		--with-zlib \
+        		--with-kerberos \
+                --with-openssl=/usr \
+                --with-mysql=mysqlnd \
+                --with-mysqli=mysqlnd \
+                --with-pdo-mysql=mysqlnd \
+                --with-pdo-sqlite \
+                --with-pdo-pgsql \
+                --with-readline \
+                --with-recode \
+                --with-png-dir \
+                --with-freetype-dir \
+                --with-zlib-dir \
+                --with-jpeg-dir \
+                --with-mcrypt \
+                --with-xsl \
+                --with-tidy \
+                --with-xmlrpc \
+                --with-gettext=shared \
+        		--with-gd \
+                --with-pear \
+                --enable-sockets \
+                --enable-exif \
+                --enable-zip \
+                --enable-soap \
+                --enable-sysvsem \
+                --enable-cgi \
+                --enable-sysvshm \
+                --enable-shmop \
+                --enable-pcntl \
+                --enable-bcmath \
+                --enable-xmlreader \
+                --enable-intl=shared \
+                --enable-wddx \
+        		--with-apxs2 \
+        	&& make -j "$(nproc)" \
+        	&& make install \
+        	&& { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
+        	&& make clean \
+        	&& dpkg -r bison libbison-dev
+
 
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
+
+# install pecl extensions for apcu, xdebug, and yaml
+RUN docker-php-ext-pecl-install APC-3.1.13 xdebug-2.2.7 \
+    && sed -i 's/^/;/' /usr/local/etc/php/conf.d/docker-php-pecl-xdebug.ini \
+    && apt-get update \
+    && apt-get install -y mysql-client postgresql-client sudo sqlite3 --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY ./conf/php/php.ini /usr/local/etc/php/php.ini
+COPY ./conf/php/php-cli.ini /usr/local/etc/php/php-cli.ini
+
+# Install Composer, Drush
+# Register the COMPOSER_HOME environment variable
+ENV COMPOSER_HOME /composer
+# Add global binary directory to PATH and make sure to re-export it
+ENV PATH /composer/vendor/bin:$PATH
+# Allow Composer to be run as root
+ENV COMPOSER_ALLOW_SUPERUSER 1
+RUN curl -o /tmp/composer-setup.php https://getcomposer.org/installer \
+  && curl -o /tmp/composer-setup.sig https://composer.github.io/installer.sig \
+  && php -r "if (hash('SHA384', file_get_contents('/tmp/composer-setup.php')) !== trim(file_get_contents('/tmp/composer-setup.sig'))) { unlink('/tmp/composer-setup.php'); echo 'Invalid installer' . PHP_EOL; exit(1); }"
+RUN php /tmp/composer-setup.php --filename composer --install-dir /usr/local/bin \
+  && rm /tmp/composer-setup.php \
+  && composer global require drush/drush:7.4.0 \
+  && ln -s /composer/vendor/bin/drush /usr/local/bin \
+  && /usr/local/bin/drush --version
 
 ENTRYPOINT ["docker-php-entrypoint"]
 
