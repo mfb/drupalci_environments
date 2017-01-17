@@ -108,6 +108,7 @@ RUN set -xe \
         libjpeg62-turbo-dev \
         libmcrypt-dev \
         libpng12-dev \
+        libwebp-dev \
         libpq-dev \
         libsqlite3-dev \
         libssl-dev \
@@ -156,6 +157,7 @@ RUN set -xe \
             --with-pear \
             --enable-sockets \
             --enable-exif \
+            --with-webp-dir \
             --enable-zip \
             --enable-soap \
             --enable-sysvsem \
