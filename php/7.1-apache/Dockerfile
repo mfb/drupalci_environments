@@ -129,6 +129,7 @@ RUN set -xe \
         libjpeg62-turbo-dev \
         libmcrypt-dev \
         libpng12-dev \
+        libwebp-dev \
         libpq-dev \
         libsqlite3-dev \
         libssl-dev \
@@ -173,6 +174,7 @@ RUN set -xe \
             --with-xmlrpc \
             --with-gettext=shared \
     		--with-gd \
+            --with-webp-dir \
             --with-pear \
             --enable-sockets \
             --enable-exif \
