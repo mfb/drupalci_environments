@@ -6,8 +6,12 @@ set -eux
 #
 ####
 
-mapfile -t DOCKERFILES < <(git diff-tree --no-commit-id --name-status -r HEAD |grep Dockerfile|grep -v ^D|awk '{print $2}')
 GITBRANCH=${1#origin/}
+if [ "${GITBRANCH}" != "production" ]; then
+         mapfile -t DOCKERFILES < <(git diff-tree --no-commit-id --name-status -r HEAD |grep Dockerfile|grep -v ^D|awk '{print $2}')
+else
+         mapfile -t DOCKERFILES < <(git diff-tree --no-commit-id --name-status -r -m HEAD |grep Dockerfile|grep -v ^D|awk '{print $2}')
+fi
 
 if [[ ! -z "${DOCKERFILES-}" ]]; then
     for DOCKERFILE in "${DOCKERFILES[@]}"
