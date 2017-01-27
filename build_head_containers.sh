@@ -21,3 +21,6 @@ if [[ ! -z "${DOCKERFILES-}" ]]; then
       fi
     done
 fi
+
+#clean up extra images
+docker images |grep none |awk '{print $3}' |xargs docker rmi
