@@ -201,7 +201,7 @@ COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 RUN docker-php-ext-pecl-install APCu xdebug yaml \
     && sed -i 's/^/;/' /usr/local/etc/php/conf.d/docker-php-pecl-xdebug.ini \
     && apt-get update \
-    && apt-get install -y mysql-client postgresql-client sudo sqlite3 --no-install-recommends \
+    && apt-get install -y mysql-client postgresql-client sudo git sqlite3 --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY ./conf/php/php.ini /usr/local/etc/php/php.ini
