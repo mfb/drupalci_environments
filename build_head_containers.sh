@@ -6,6 +6,9 @@ set -eux
 #
 ####
 
+# make sure any floating containers are cleaned up
+docker ps -a |grep Exited |awk '{print $1}'|xargs docker rm || true
+
 GITBRANCH=${1}
 
 mapfile -t DOCKERFILES < <(ls -1 php/*.x-apache/Dockerfile)
