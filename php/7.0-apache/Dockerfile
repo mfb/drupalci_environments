@@ -80,9 +80,9 @@ ENV PHP_LDFLAGS=""
 
 ENV GPG_KEYS 1A4E8B7277C42E53DBA9C7B9BCAA30EA9C0D5763
 
-ENV PHP_VERSION 7.0.15
-ENV PHP_URL="https://secure.php.net/get/php-7.0.15.tar.xz/from/this/mirror" PHP_ASC_URL="https://secure.php.net/get/php-7.0.15.tar.xz.asc/from/this/mirror"
-ENV PHP_SHA256="300364d57fc4a6176ff7d52d390ee870ab6e30df121026649f8e7e0b9657fe93" PHP_MD5="dca23412f3e3b3987e582091b751925d"
+ENV PHP_VERSION 7.0.17
+ENV PHP_URL="https://secure.php.net/get/php-7.0.17.tar.xz/from/this/mirror" PHP_ASC_URL="https://secure.php.net/get/php-7.0.17.tar.xz.asc/from/this/mirror"
+ENV PHP_SHA256="471c16fcdd6a5e1a37199e97bcaeea6117626229785185be7532aaa7c6ee04be" PHP_MD5="549df69a7a3c79d49fcafe2097579d9e"
 
 RUN set -xe; \
 	\
