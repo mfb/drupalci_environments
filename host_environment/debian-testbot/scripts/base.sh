@@ -77,7 +77,7 @@ then
     exit 1
 fi
 
-php composer-setup.php --filename=composer --install-dir=/usr/local/bin --version=1.4.0
+php composer-setup.php --filename=composer --install-dir=/usr/local/bin --version=1.4.1
 RESULT=$?
 rm composer-setup.php
 
