@@ -14,6 +14,6 @@ export JAVA_HOME=/usr
 # Packer configuration
 export PACKER_HOME=/usr/local/bin
 export PACKER_LOG=1
-cd /usr/local/drupal-infrastructure/drupalci/debian-testbot
+cd /usr/local/drupalci_environments/host_environment/debian-testbot
 source packer_variables.sh
 ${PACKER_HOME}/packer build -force drupalci-jesse.json
