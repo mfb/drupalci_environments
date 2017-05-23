@@ -161,7 +161,7 @@
     "provisioners": [
         {
             "type": "shell",
-            "only": ["jessie-awsebs","jessie-vboxiso"],
+            "only": ["jessie-awsebs","jessie-vboxiso","jessie-vmwareiso"],
             "execute_command": "echo '{{user `ssh_pass`}}' | {{.Vars}} sudo -E -S bash '{{.Path}}'",
             "scripts": [
                 "scripts/base.sh",
@@ -187,6 +187,15 @@
             "execute_command": "echo '{{user `ssh_pass`}}' | {{.Vars}} sudo -E -S bash '{{.Path}}'",
             "scripts": [
                 "scripts/vagrant.sh"
+            ]
+        },
+
+        {
+            "type": "shell",
+            "only": ["jessie-vmwareiso"],
+            "execute_command": "echo '{{user `ssh_pass`}}' | {{.Vars}} sudo -E -S bash '{{.Path}}'",
+            "scripts": [
+                "scripts/vmware.sh"
             ]
         }
     ],
