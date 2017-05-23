@@ -7,6 +7,8 @@
         "iso_sha512": "{{env `PACKER_DEBIAN_ISO_SUM`}}",
         "cores": "2",
         "memory": "1024",
+        "vm_cores": "16",
+        "vm_memory": "24576",
         "vram": "16",
         "disk_size": "20480",
         "ssh_user": "{{env `PACKER_SSH_USER`}}",
@@ -44,6 +46,58 @@
                 [ "modifyvm", "{{.Name}}", "--memory", "{{user `memory`}}" ],
                 [ "modifyvm", "{{.Name}}", "--vram", "{{user `vram`}}" ]
             ],
+
+            "boot_command": [
+                "<esc><wait>",
+                "install <wait>",
+                "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed.cfg <wait>",
+                "debian-installer={{user `locale`}} <wait>",
+                "auto <wait>",
+                "locale={{user `locale`}} <wait>",
+                "time/zone={{user `timezone`}} <wait>",
+                "kbd-chooser/method=us <wait>",
+                "netcfg/get_hostname={{user `hostname`}} <wait>",
+                "netcfg/get_domain={{user `domain`}} <wait>",
+                "fb=false <wait>",
+                "debconf/frontend=noninteractive <wait>",
+                "console-setup/ask_detect=false <wait>",
+                "console-keymaps-at/keymap={{user `kbd_lang`}} <wait>",
+                "keyboard-configuration/xkb-keymap={{user `kbd_lang`}} <wait>",
+                "keyboard-configuration/modelcode={{user `kbd_model`}} <wait>",
+                "passwd/root-login=false <wait>",
+                "passwd/user-fullname={{user `ssh_user`}} <wait>",
+                "passwd/username={{user `ssh_user`}} <wait>",
+                "passwd/user-password=\"{{user `ssh_pass`}}\" <wait>",
+                "passwd/user-password-again=\"{{user `ssh_pass`}}\" <wait>",
+                "<enter><wait>"
+            ],
+            "disk_size": "{{user `disk_size`}}",
+            "http_directory": "http",
+            "iso_checksum": "{{user `iso_sha512`}}",
+            "iso_checksum_type": "sha512",
+            "iso_url": "{{user `iso_url`}}",
+            "communicator": "ssh",
+            "ssh_username": "{{user `ssh_user`}}",
+            "ssh_password": "{{user `ssh_pass`}}",
+            "ssh_port": "{{user `ssh_port`}}",
+            "ssh_wait_timeout": "{{user `ssh_wait_timeout`}}",
+            "shutdown_command": "echo '{{user `ssh_pass`}}' | sudo -S shutdown -P now",
+            "output_directory": "{{user `outputs_dir`}}/{{user `vm_name`}}_{{build_name}}/"
+        },
+
+        {
+            "type": "vmware-iso",
+            "name": "jessie-vmwareiso",
+            "headless": "false",
+            "disk_type_id": "0",
+            "guest_os_type": "debian8-64",
+            "tools_upload_flavor": "linux",
+            "tools_upload_path": "/var/tmp/{{.Flavor}}.iso",
+            "version": "9",
+            "vmx_data": {
+                "numvcpus": "{{user `vm_cores`}}",
+                "memsize": "{{user `vm_memory`}}"
+            },
 
             "boot_command": [
                 "<esc><wait>",
