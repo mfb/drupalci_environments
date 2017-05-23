@@ -15,6 +15,11 @@ echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sou
 curl -s https://s3.amazonaws.com/download.draios.com/DRAIOS-GPG-KEY.public | apt-key add -
 curl -s -o /etc/apt/sources.list.d/draios.list http://download.draios.com/stable/deb/draios.list
 
+# Add yarn
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+
+
 # prep for nodejs installation
 curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
 
@@ -58,7 +63,8 @@ apt-get -y install bash-completion \
                    sysstat \
                    sysdig \
                    vim \
-                   wget
+                   wget \
+                   yarn
 apt-get clean
 apt-get -y autoremove
 # we want xdebug there, just disabled.
