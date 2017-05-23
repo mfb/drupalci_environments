@@ -1,6 +1,5 @@
 # Debian Jessie ISO (sha512 checksum)
-#export PACKER_DEBIAN_ISO_URL="$HOME/home/software_archive/linux_isos/debian/debian-8.2.0-amd64-netinst.iso"
-export PACKER_DEBIAN_ISO_URL="http://cdimage.debian.org/debian-cd/8.7.1/amd64/iso-cd/debian-8.7.1-amd64-netinst.iso"
+export PACKER_DEBIAN_ISO_URL="https://cdimage.debian.org/mirror/cdimage/archive/8.7.1/amd64/iso-cd/debian-8.7.1-amd64-netinst.iso"
 export PACKER_DEBIAN_ISO_SUM="534795785d2706e64e3a4dff9648fd0302a1272c668a99a81ba3a984695986ac814d8193c5335bd13dce0592fc470eebe9fc4a6c9991f87a6686329a667ac30d"
 
 # User to be created

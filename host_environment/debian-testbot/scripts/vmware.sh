@@ -16,11 +16,6 @@ install_headers () {
     apt-get install -y dkms
 }
 
-clean_headers () {
-    apt-get -y remove linux-headers-$(uname -r) build-essential perl
-    apt-get -y autoremove
-}
-
 case "$PACKER_BUILDER_TYPE" in
 
     "vmware-iso" | "vmware-ovf")
@@ -36,11 +31,11 @@ case "$PACKER_BUILDER_TYPE" in
             umount /mnt/cdrom
             rm "$iso_url"
             rm -rf /tmp/vmtools
-            clean_headers
+
         elif [ $use_open_vm_tools -eq 1 ]; then
             install_headers
             apt-get install -y open-vm-tools open-vm-tools-dkms
-            clean_headers
+
         else
             echo "ERROR: something went wrong. Incorrect choice of vm tools."
             exit 3
