@@ -103,6 +103,9 @@ fs.aio-max-nr = 1048576
 EOF
 ) >> /etc/sysctl.conf
 
+# enable local user namespaces
+echo 'kernel.unprivileged_userns_clone=1' > /etc/sysctl.d/00-local-userns.conf
+
 (
 cat << EOF
 *               soft    core            unlimited
