@@ -47,4 +47,5 @@ EXPOSE 9515
 
 ENTRYPOINT [ "chromedriver" ]
 
+#TODO Remove the logging and verbosity
 CMD [ "--log-path=/tmp/chromedriver.log", "--verbose", "--whitelisted-ips=" ]
