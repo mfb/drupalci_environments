@@ -14,37 +14,37 @@ RUN apt-get update && apt-get install -y \
 	unzip \
     gnupg \
 	--no-install-recommends \
-	&& curl -sSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
+	&& curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
 	&& echo "deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
 	&& apt-get update && apt-get install -y \
 	google-chrome-stable \
-	--no-install-recommends \
-	&& apt-get purge --auto-remove -y curl gnupg \
+	&& apt-get purge --auto-remove -y curl \
 	&& rm -rf /var/lib/apt/lists/*
 
+
 #==================
-# Chrome webdriver
+# Chromedriver
 #==================
-ARG CHROME_DRIVER_VERSION=2.32
+ARG CHROME_DRIVER_VERSION=2.33
 RUN wget --no-verbose -O /tmp/chromedriver_linux64.zip https://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip \
-  && unzip /tmp/chromedriver_linux64.zip -d /opt/google \
+  && unzip /tmp/chromedriver_linux64.zip -d /opt\
   && rm /tmp/chromedriver_linux64.zip \
-  && mv /opt/google/chromedriver /opt/google/chromedriver-$CHROME_DRIVER_VERSION \
-  && chmod 755 /opt/google/chromedriver-$CHROME_DRIVER_VERSION \
-  && ln -fs /opt/google/chromedriver-$CHROME_DRIVER_VERSION /usr/bin/chromedriver
+  && mv /opt/chromedriver /opt/chromedriver-$CHROME_DRIVER_VERSION \
+  && chmod 755 /opt/chromedriver-$CHROME_DRIVER_VERSION \
+  && ln -fs /opt/chromedriver-$CHROME_DRIVER_VERSION /usr/local/bin/chromedriver
 
 RUN wget -O /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.0/dumb-init_1.2.0_amd64
 RUN chmod +x /usr/local/bin/dumb-init
 
 # Add Chrome as a user
-RUN groupadd -r chrome && useradd -r -g chrome -G audio,video chrome \
-    && mkdir -p /home/chrome && chown -R chrome:chrome /home/chrome
+RUN groupadd -r chromeuser && useradd -r -g chromeuser -G audio,video chromeuser \
+    && mkdir -p /home/chromeuser && chown -R chromeuser:chromeuser /home/chromeuser
 
 # Run Chrome non-privileged
-USER chrome
+USER chromeuser
 
 EXPOSE 9515
 
 ENTRYPOINT [ "chromedriver" ]
 
-CMD [ "--whitelisted-ips --log-path=/tmp/chromedriver.log --verbose" ]
+CMD [ "--log-path=/tmp/chromedriver.log", "--verbose", "--whitelisted-ips=" ]
