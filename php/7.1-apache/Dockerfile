@@ -81,9 +81,9 @@ ENV PHP_LDFLAGS=""
 ENV GPG_KEYS A917B1ECDA84AEC2B568FED6F50ABC807BD5DCD0 528995BFEDFBA7191D46839EF9BA0ADA31CBD89E
 
 # PHP Version
-ENV PHP_VERSION 7.1.5
-ENV PHP_URL="https://secure.php.net/get/php-7.1.5.tar.xz/from/this/mirror" PHP_ASC_URL="https://secure.php.net/get/php-7.1.5.tar.xz.asc/from/this/mirror"
-ENV PHP_SHA256="d149a3c396c45611f5dc6bf14be190f464897145a76a8e5851cf18ff7094f6ac" PHP_MD5="fb0702321c7aceac68c82b8c7a10d196"
+ENV PHP_VERSION 7.1.11
+ENV PHP_URL="https://secure.php.net/get/php-7.1.11.tar.xz/from/this/mirror" PHP_ASC_URL="https://secure.php.net/get/php-7.1.11.tar.xz.asc/from/this/mirror"
+ENV PHP_SHA256="074093e9d7d21afedc5106904218a80a47b854abe368d2728ed22184c884893e"
 
 RUN set -xe; \
 	\
@@ -102,10 +102,6 @@ RUN set -xe; \
 	if [ -n "$PHP_SHA256" ]; then \
 		echo "$PHP_SHA256 *php.tar.xz" | sha256sum -c -; \
 	fi; \
-	if [ -n "$PHP_MD5" ]; then \
-		echo "$PHP_MD5 *php.tar.xz" | md5sum -c -; \
-	fi; \
-	\
 	if [ -n "$PHP_ASC_URL" ]; then \
 		wget -O php.tar.xz.asc "$PHP_ASC_URL"; \
 		export GNUPGHOME="$(mktemp -d)"; \
