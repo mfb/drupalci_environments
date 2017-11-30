@@ -78,12 +78,12 @@ ENV PHP_CFLAGS="-O2 -g"
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS=""
 
-ENV GPG_KEYS 1A4E8B7277C42E53DBA9C7B9BCAA30EA9C0D5763 6E4F6AB321FDC07F2C332E3AC2BF0BC433CFC8B3
+ENV GPG_KEYS 1729F83938DA44E27BA0F4D3DBDB397470D12172 B1B44D8F021E4E2D6021E995DC9FF8D3EE5AF27F
 
 # PHP Version
-ENV PHP_VERSION 7.0.26
-ENV PHP_URL="https://secure.php.net/get/php-7.0.26.tar.xz/from/this/mirror" PHP_ASC_URL="https://secure.php.net/get/php-7.0.26.tar.xz.asc/from/this/mirror"
-ENV PHP_SHA256="ed5cbb4bbb0ddef8985f100bba2e94002ad22a230b5da2dccfe148915df5f199"
+ENV PHP_VERSION 7.2.0
+ENV PHP_URL="https://secure.php.net/get/php-7.2.0.tar.xz/from/this/mirror" PHP_ASC_URL="https://secure.php.net/get/php-7.2.0.tar.xz.asc/from/this/mirror"
+ENV PHP_SHA256="87572a6b924670a5d4aac276aaa4a94321936283df391d702c845ffc112db095"
 
 RUN set -xe; \
 	\
@@ -126,6 +126,7 @@ RUN set -xe \
         libjpeg62-turbo-dev \
         libmcrypt-dev \
         libpng12-dev \
+        libwebp-dev \
         libpq-dev \
         libsqlite3-dev \
         libssl-dev \
@@ -170,6 +171,7 @@ RUN set -xe \
             --with-xmlrpc \
             --with-gettext=shared \
     		--with-gd \
+            --with-webp-dir \
             --with-pear \
             --enable-sockets \
             --enable-exif \
@@ -194,8 +196,10 @@ RUN set -xe \
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
 # install pecl extensions for apcu, xdebug, and yaml
-RUN docker-php-ext-pecl-install APCu xdebug yaml-2.0.0 \
-    && sed -i 's/^/;/' /usr/local/etc/php/conf.d/docker-php-pecl-xdebug.ini \
+# TODO: re-add xdebug when it exists.
+#RUN docker-php-ext-pecl-install APCu xdebug yaml-2.0.0 \
+#    && sed -i 's/^/;/' /usr/local/etc/php/conf.d/docker-php-pecl-xdebug.ini \
+RUN docker-php-ext-pecl-install APCu yaml-2.0.0 \
     && apt-get update \
     && apt-get install -y mysql-client postgresql-client sudo git sqlite3 --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
