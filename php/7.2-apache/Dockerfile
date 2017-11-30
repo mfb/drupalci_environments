@@ -196,8 +196,10 @@ RUN set -xe \
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
 # install pecl extensions for apcu, xdebug, and yaml
-RUN docker-php-ext-pecl-install APCu xdebug yaml-2.0.0 \
-    && sed -i 's/^/;/' /usr/local/etc/php/conf.d/docker-php-pecl-xdebug.ini \
+# TODO: re-add xdebug when it exists.
+#RUN docker-php-ext-pecl-install APCu xdebug yaml-2.0.0 \
+#    && sed -i 's/^/;/' /usr/local/etc/php/conf.d/docker-php-pecl-xdebug.ini \
+RUN docker-php-ext-pecl-install APCu yaml-2.0.0 \
     && apt-get update \
     && apt-get install -y mysql-client postgresql-client sudo git sqlite3 --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
