@@ -178,8 +178,8 @@ RUN set -xe \
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
 # install pecl extensions for apcu, xdebug, and yaml
-RUN docker-php-ext-pecl-install APCu xdebug yaml-2.0.0 \
-    && sed -i 's/^/;/' /usr/local/etc/php/conf.d/docker-php-pecl-xdebug.ini \
+RUN docker-php-ext-pecl-install APCu yaml-2.0.0 \
+    #&& sed -i 's/^/;/' /usr/local/etc/php/conf.d/docker-php-pecl-xdebug.ini \
     && apt-get update \
     && apt-get install -y mysql-client postgresql-client sudo git sqlite3 --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
@@ -208,6 +208,18 @@ RUN curl -SL "https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-li
   && rm -rf /var/lib/apt/lists/*
 
 COPY ./conf/supervisor-phantomjs.conf /etc/supervisor/conf.d/phantomjs.conf
+
+# Install node, yarn
+RUN apt-get update \
+    && apt-get install -y apt-transport-https ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+RUN curl -sS https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add - \
+    && echo "deb https://deb.nodesource.com/node_8.x jessie main" | tee /etc/apt/sources.list.d/nodesource.list \
+    && curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
+    && echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list \
+    && apt-get update \
+    && apt-get install -y nodejs yarn \
+    && rm -rf /var/lib/apt/lists/*
 
 ENTRYPOINT ["docker-php-entrypoint"]
 

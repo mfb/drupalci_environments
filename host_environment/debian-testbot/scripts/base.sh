@@ -15,17 +15,19 @@ echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sou
 curl -s https://s3.amazonaws.com/download.draios.com/DRAIOS-GPG-KEY.public | apt-key add -
 curl -s -o /etc/apt/sources.list.d/draios.list http://download.draios.com/stable/deb/draios.list
 
-# Add yarn
+# Add yarn repo
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 
 
-# prep for nodejs installation
-curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+# Add node repo
+
+curl -sS https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -
+echo "deb https://deb.nodesource.com/node_8.x jessie main" | sudo tee /etc/apt/sources.list.d/nodesource.list
 
 apt-get update
 
-# Packages.
+# Packages. Sorted alphabetically because we're civilized.
 apt-get -y install bash-completion \
                    bsdtar \
                    dstat \
