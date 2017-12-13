@@ -32,6 +32,14 @@ docker pull drupalci/php-7.1-apache:dev
 docker pull drupalci/php-7.1-apache:production
 docker pull drupalci/php-7.1.x-apache:dev
 docker pull drupalci/php-7.1.x-apache:production
+docker pull drupalci/php-7.2-apache:dev
+docker pull drupalci/php-7.2-apache:production
+docker pull drupalci/php-7.2.x-apache:dev
+docker pull drupalci/php-7.2.x-apache:production
+
+docker pull drupalci/chromedriver:dev
+docker pull drupalci/chromedriver:production
+
 
 # new containers.
 #for CONTAINER in $(find ./containers -name Dockerfile | grep -v 'dev' | awk -F"/" '{print $4}');
