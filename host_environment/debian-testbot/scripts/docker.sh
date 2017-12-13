@@ -4,7 +4,7 @@
 # Author:      Nick Schuch (nick@myschuch.com)
 # Description: Installs Docker.
 date
-apt-cache show docker-engine |grep Filename
+
 
 #Add docker's ancient key and install our current version of docker
 echo '-----BEGIN PGP PUBLIC KEY BLOCK-----
@@ -73,6 +73,7 @@ EJOQTvBR8Q==
 -----END PGP PUBLIC KEY BLOCK-----' | apt-key add -
 echo 'deb [arch=amd64] https://apt.dockerproject.org/repo debian-jessie main' > /etc/apt/sources.list.d/docker.list
 apt-get update
+apt-cache show docker-engine |grep Filename
 apt-get install -y docker-engine=1.12.1-0~jessie
 
 # We also need to add the "testbot" user to the docker group so it can run
