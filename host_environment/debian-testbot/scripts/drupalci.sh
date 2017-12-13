@@ -18,7 +18,7 @@ DIR="/opt/drupalci"
 TESTRUNNER_DIR="${DIR}/testrunner"
 DRUPAL_DIR="${DIR}/drupal-checkout"
 COMPOSER_CACHE_DIR="${DIR}/composer-cache"
-mkdir ${COMPOSER_CACHE_DIR}
+mkdir -p ${COMPOSER_CACHE_DIR}
 composer config -g cache-dir ${COMPOSER_CACHE_DIR}
 git clone --branch production http://git.drupal.org/project/drupalci_testbot.git ${TESTRUNNER_DIR}
 composer install --prefer-dist --no-progress --working-dir ${TESTRUNNER_DIR}

@@ -26,7 +26,7 @@
     "remote_host": "util.drupal.bak",
     "remote_datastore": "datastore1",
     "remote_username": "root",
-    "remote_password": "yX67d7l5HC",
+    "remote_password": "****",
     "remote_type": "esx5",
     "box_organization": "drupalci",
     "box_name": "testbot"
