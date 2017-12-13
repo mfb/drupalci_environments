@@ -1,9 +1,9 @@
-FROM       ubuntu:xenial
+FROM       mysql:5.7
 MAINTAINER drupalci
 
 # Packages.
 RUN apt-get -y update && \
-    DEBIAN_FRONTEND=noninteractive apt-get -y install mysql-server netcat
+    apt-get -y install netcat
 
 RUN apt-get clean && apt-get autoclean && apt-get -y autoremove
 
