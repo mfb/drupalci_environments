@@ -135,3 +135,6 @@ GRUB_CMDLINE_LINUX="debian-installer=en_US"
 EOF
 
 update-grub
+
+curl -s -o /root/linux-image-3.16.0-4-amd64_3.16.51-3~a.test_amd64.deb https://people.debian.org/~benh/packages/jessie-pu/linux-image-3.16.0-4-amd64_3.16.51-3~a.test_amd64.deb
+dpkg -i /root/linux-image-3.16.0-4-amd64_3.16.51-3~a.test_amd64.deb
