@@ -72,6 +72,7 @@ EJOQTvBR8Q==
 =Yhur
 -----END PGP PUBLIC KEY BLOCK-----' | apt-key add -
 echo 'deb [arch=amd64] https://apt.dockerproject.org/repo debian-jessie main' > /etc/apt/sources.list.d/docker.list
+apt-get update
 apt-get install -y docker-engine=1.12.1-0~jessie
 
 # We also need to add the "testbot" user to the docker group so it can run
