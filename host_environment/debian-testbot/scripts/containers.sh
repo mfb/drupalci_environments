@@ -4,11 +4,14 @@
 # This would require using their API somehow, which might mean that we'd have to have a
 
 docker pull drupalci/mysql-5.5
+docker pull drupalci/mysql-5.7
 docker pull drupalci/pgsql-9.1
 
 #pull new db containers
 docker pull drupalci/db-mysql-5.5:dev
 docker pull drupalci/db-mysql-5.5:production
+docker pull drupalci/db-mysql-5.7:dev
+docker pull drupalci/db-mysql-5.7:production
 docker pull drupalci/db-pgsql-9.1:dev
 docker pull drupalci/db-pgsql-9.1:production
 #pull php containers
